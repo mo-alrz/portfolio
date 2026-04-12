@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power BI Projects — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26;
+    --pbi: #f2c811; --pbi-dim: rgba(242,200,17,0.12);
+    --text: #f0f0f5; --muted: #888899; --border: rgba(255,255,255,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 1.2rem 3rem; display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px); background: rgba(10,10,15,0.85); border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: #06d6a0; letter-spacing: 0.1em; text-decoration: none; }
+  .nav-back { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
+  .nav-back:hover { color: var(--text); }
+
+  .page-hero {
+    padding: 8rem 3rem 3rem; max-width: 1300px; margin: 0 auto;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+  }
+  .breadcrumb { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; }
+  .breadcrumb a { color: #06d6a0; text-decoration: none; }
+  .pbi-badge {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--pbi-dim); border: 1px solid rgba(242,200,17,0.3);
+    padding: 0.5rem 1.2rem; border-radius: 100px;
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--pbi); letter-spacing: 0.08em; margin-bottom: 1.5rem;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .title-accent { color: var(--pbi); }
+  .page-desc { color: var(--muted); margin-top: 1rem; max-width: 480px; font-size: 1rem; line-height: 1.7; }
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; align-self: flex-start; padding-top: 5rem; }
+  .htag { font-family: 'Space Mono', monospace; font-size: 0.7rem; padding: 0.4rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 100px; color: var(--muted); }
+
+  .divider { height: 1px; background: var(--border); max-width: 1300px; margin: 0 auto; }
+
+  .edit-hint { max-width: 1300px; margin: 2rem auto 0; padding: 0 3rem; }
+  .hint-box { background: rgba(242,200,17,0.04); border: 1px dashed rgba(242,200,17,0.2); border-radius: 12px; padding: 1rem 1.5rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .hint-text { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); line-height: 1.8; }
+  .hint-text strong { color: var(--pbi); }
+
+  /* ── GRID ── */
+  .projects-container { max-width: 1300px; margin: 0 auto; padding: 3rem; }
+  .projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4rem 3.5rem; }
+
+  .project-card {
+    display: flex; flex-direction: column; gap: 1.4rem;
+    opacity: 0; transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .project-card.visible { opacity: 1; transform: none; }
+
+  /* Screenshots */
+  .screenshot-main-frame {
+    width: 100%; aspect-ratio: 16/10; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--card);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5); cursor: pointer; position: relative;
+    transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1), box-shadow 0.35s, border-color 0.3s;
+  }
+  .screenshot-main-frame:hover { transform: scale(1.025) translateY(-4px); box-shadow: 0 24px 60px rgba(0,0,0,0.65); border-color: rgba(242,200,17,0.35); }
+  .screenshot-main-frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+  .zoom-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
+  .screenshot-main-frame:hover .zoom-overlay { background: rgba(0,0,0,0.28); }
+  .zoom-icon { width: 46px; height: 46px; border-radius: 50%; background: rgba(242,200,17,0.9); color: #0a0a0f; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; opacity: 0; transform: scale(0.6); transition: opacity 0.3s, transform 0.3s; }
+  .screenshot-main-frame:hover .zoom-icon { opacity: 1; transform: scale(1); }
+
+  .ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; background: linear-gradient(135deg, #14141e, #0e0e18); }
+  .ph-icon { font-size: 2.5rem; }
+  .ph-label { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: rgba(255,255,255,0.18); letter-spacing: 0.1em; text-align: center; line-height: 1.6; }
+
+  .thumb-strip { display: flex; gap: 0.6rem; margin-top: 0.6rem; }
+  .thumb-frame { flex: 1; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; background: var(--card); position: relative; transition: border-color 0.3s, transform 0.3s; }
+  .thumb-frame:hover { border-color: rgba(242,200,17,0.4); transform: translateY(-3px); }
+  .thumb-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-frame .ph { gap: 0.3rem; }
+  .thumb-frame .ph-icon { font-size: 1rem; }
+  .thumb-frame .ph-label { font-size: 0.55rem; }
+
+  /* Info */
+  .project-info { display: flex; flex-direction: column; gap: 0.75rem; }
+  .project-meta { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .project-num { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--pbi); letter-spacing: 0.15em; }
+  .project-type { font-family: 'Space Mono', monospace; font-size: 0.63rem; color: var(--muted); background: rgba(255,255,255,0.05); padding: 0.2rem 0.65rem; border-radius: 4px; border: 1px solid var(--border); }
+  .project-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+  .project-desc { color: var(--muted); font-size: 0.87rem; line-height: 1.75; }
+  .project-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+  .project-bullets li { font-size: 0.83rem; color: var(--muted); display: flex; gap: 0.6rem; line-height: 1.5; }
+  .project-bullets li::before { content: '▸'; color: var(--pbi); flex-shrink: 0; }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.2rem; }
+  .ptag { font-family: 'Space Mono', monospace; font-size: 0.62rem; padding: 0.22rem 0.65rem; border-radius: 100px; background: var(--pbi-dim); color: var(--pbi); border: 1px solid rgba(242,200,17,0.2); }
+  .ptag.gray { background: rgba(255,255,255,0.05); color: var(--muted); border-color: var(--border); }
+  .ptag.blue {
+  background: rgba(59, 130, 246, 0.1);   /* soft blue bg */
+  color: #3b82f6;                        /* blue text */
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.ptag.orange {
+  background: rgba(249, 115, 22, 0.1);   /* soft orange bg */
+  color: #f97316;                        /* orange text */
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.ptag.yellow {
+  background: rgba(234, 179, 8, 0.15);   /* slightly stronger so it's visible */
+  color: #eab308;                        /* yellow text */
+  border-color: rgba(234, 179, 8, 0.4);
+}
+
+  /* Lightbox */
+  .lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.94); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(12px); }
+  .lightbox.open { opacity: 1; pointer-events: all; }
+  .lb-inner { position: relative; max-width: 90vw; max-height: 88vh; }
+  .lb-inner img { max-width: 90vw; max-height: 85vh; border-radius: 12px; box-shadow: 0 0 100px rgba(0,0,0,0.8); display: block; }
+  .lb-ph { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.82rem; text-align: center; padding: 3rem 4rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; line-height: 2; }
+  .lb-close { position: fixed; top: 1.5rem; right: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .lb-close:hover { background: rgba(255,255,255,0.2); }
+  .lb-cap { position: absolute; bottom: -2.2rem; left: 0; right: 0; text-align: center; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+
+  @media(max-width:1050px) { .projects-grid { grid-template-columns: 1fr; gap: 4rem; } }
+  @media(max-width:768px) { nav { padding: 1rem 1.5rem; } .page-hero { padding: 7rem 1.5rem 2rem; } .projects-container, .edit-hint { padding: 1.5rem; } .hero-tags { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="lightbox" id="lightbox" onclick="closeLb(event)">
+  <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('open');document.body.style.overflow=''">✕</button>
+  <div class="lb-inner">
+    <img id="lb-img" src="" alt="" style="display:none">
+    <div id="lb-ph" class="lb-ph" style="display:none">📸 No screenshot added yet.<br><span style="font-size:0.65rem;opacity:0.5">Uncomment the &lt;img&gt; line and add your file.</span></div>
+    <div class="lb-cap" id="lb-cap"></div>
+  </div>
+</div>
+
+<nav>
+  <a href="index_clean.html" class="nav-logo">Mohammad's portfolio</a>
+  <a href="index_clean.html#projects" class="nav-back">← Back to Projects</a>
+</nav>
+
+<div class="page-hero">
+  <div class="hero-left">
+    <div class="breadcrumb"><a href="index.html">home</a> / <a href="projects.html">projects</a> / power bi</div>
+    <div class="pbi-badge"><img src="logo4.png" alt="Power BI" style="width:28px;">Power BI & DAX</div>
+    <h1 class="page-title">Power <span class="title-accent">BI</span><br>Projects</h1>
+    <p class="page-desc">Interactive dashboards, KPI reports, and data storytelling solutions built with Power BI, DAX, and Power Query.</p>
+  </div>
+  <div class="hero-tags">
+    <span class="htag">Power BI</span>
+    <span class="htag">DAX</span>
+    <span class="htag">Power Query</span>
+    <span class="htag">Data Modeling</span>
+    <span class="htag">M Language</span>
+    <span class="htag">KPI Design</span>
+  </div>
+</div>
+<div class="divider"></div>
+
+<div class="edit-hint"><div style="height:1.5rem"></div>
+  <div class="hint-box">
+    <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px">💡</span>
+    <div class="hint-text">
+      <strong>In this page:</strong> You’ll find some of my latest <strong>BI and Data Engineering</strong> projects. Feel free to explore the dashboards and solutions I’ve built.
+    </div>
+  </div>
+</div>
+
+<div class="projects-container">
+<div class="projects-grid">
+
+  <!-- PROJECT 01 -->
+  <div class="project-card">
+    <div>
+      <div class="screenshot-main-frame" onclick="openLb(this,'PROJECT 01')">
+        <img src="pbi1-1.png" alt="Project 1">
+        <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">MAIN SCREENSHOT<br>pbi1-1.png</span></div>
+        <div class="zoom-overlay"><div class="zoom-icon">🔍</div></div>
+      </div>
+      <div class="thumb-strip">
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 01 · Detail A')">
+          <img src="pbi1-2.png" alt="Detail A"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 1</span></div>
+        </div>
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 01 · Detail B')">
+          <img src="pbi1-3.png" alt="Detail B"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 2</span></div>
+        </div>
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 01 · Detail C')">
+          <img src="pbi1-4.png" alt="Detail C"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 3</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="project-info">
+      <div class="project-meta"><span class="project-num">PROJECT 01</span><span class="project-type">Global Fleet Management</span></div>
+      <h2 class="project-title">Rental unit Activities</h2>
+<!--      <p class="project-desc">✏️ Describe the project — goal, data source, and audience.</p>-->
+      <ul class="project-bullets">
+        <li>Cleaned and standardized historical data from 2013 onward, consolidating multiple Excel files containing 20–30 sheets each into a reliable and structured dataset</li>
+        <li>Developed a Python-based backup system for a live Excel operation file, maintaining a rolling 30-day window with 3 automated backups per day (90 available back ups)</li>
+        <li>Managed pipeline, stock, and vehicle inventory data through a live system, supporting inventory monitoring and vehicle allocation decisions</li>
+        <li>Built inventory forecasting and optimization workflows to improve planning accuracy and support more efficient stock and resource management</li>
+        <li>Consolidated all operational data into a live dashboard with 4 automatic daily refreshes, providing both a high-level overview and real-time snapshots of business activities</li>
+      </ul>
+      <div class="project-tags"><span class="ptag yellow">Power BI</span><span class="ptag orange">Python</span><span class="ptag blue">Power Query</span><span class="ptag gray">SQL</span><span class="ptag blue">Data Modeling</span></div>
+    </div>
+  </div>
+
+  <!-- PROJECT 02 -->
+  <div class="project-card">
+    <div>
+      <div class="screenshot-main-frame" onclick="openLb(this,'PROJECT 02')">
+        <img src="pbi2-1.png" alt="Project 2"> -->
+        <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">MAIN SCREENSHOT<br>pbi-02-main.png</span></div>
+        <div class="zoom-overlay"><div class="zoom-icon">🔍</div></div>
+      </div>
+      <div class="thumb-strip">
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 02 · Detail A')">
+          <img src="pbi2-3.png" alt="Detail">
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 1</span></div>
+        </div>
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 02 · Detail B')">
+          <img src="pbi2-2.png" alt="Detail"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 2</span></div>
+        </div>
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 02 · Detail C')">
+          <img src="pbi2-4.png" alt="Detail"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 3</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="project-info">
+      <div class="project-meta"><span class="project-num">PROJECT 02</span><span class="project-type">Global Fleet Management</span></div>
+      <h2 class="project-title">Bulk Fuel Tank Control System</h2>
+<!--      <p class="project-desc">✏️ Describe this project.</p>-->
+      <ul class="project-bullets">
+        <li>Designed an end-to-end fuel operations dashboard, delivering real-time visibility into issued, received, and stock fuel volumes across multiple countries and regions</li>
+        <li>Built a reconciliation framework comparing opening, issued, received, and closing balances, automatically highlighting discrepancies and improving data auditability</li>
+        <li>Developed interactive drill-down views (Region → Country → Month) enabling users to analyze trends, detect anomalies, and monitor fuel movements at different levels</li>
+        <li>Integrated multi-source data (field forms, inventory records, and tank data) into a unified reporting, providing both high-level KPIs and detailed transactional insights</li>
+        <li>Implemented automated live monitoring, delivering up-to-date snapshots of operations, including tank capacity utilization, fuel pricing averages, and allocation performance</li>
+      </ul>
+      <div class="project-tags"><span class="ptag orange">Power BI</span><span class="ptag blue">Python</span><span class="ptag gray">KoboToolBox</span><span class="ptag yellow">API</span><span class="ptag gray">Data Modeling</span></div>
+    </div>
+  </div>
+
+  <!-- PROJECT 03 -->
+  <div class="project-card">
+    <div>
+      <div class="screenshot-main-frame" onclick="openLb(this,'PROJECT 03')">
+        <img src="pbi3-1.png" alt="Project 3"> -->
+        <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">MAIN SCREENSHOT<br>pbi-03-main.png</span></div>
+        <div class="zoom-overlay"><div class="zoom-icon">🔍</div></div>
+      </div>
+      <div class="thumb-strip">
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 03 · Detail A')">
+          <img src="pbi3-2.png" alt="Detail"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 1</span></div>
+        </div>
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 03 · Detail B')">
+          <img src="pbi3-3.png" alt="Detail"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 2</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="project-info">
+      <div class="project-meta"><span class="project-num">PROJECT 03</span><span class="project-type">Global Fleet Management</span></div>
+      <h2 class="project-title">Vehicle Maintenance and Servicing</h2>
+<!--      <p class="project-desc">✏️ Describe this project.</p>-->
+      <ul class="project-bullets">
+        <li>Extracted and consolidated maintenance and service data from multiple FleetWave reports and exports into a unified analytical dataset</li>
+        <li>Designed and developed a multi-layered Power BI dashboard covering labor cost, parts cost, and performance analysis across country, region, and vehicle levels</li>
+        <li>Built advanced analytics including cost vs. vehicle age analysis, enabling identification of inefficiencies and lifecycle cost trends</li>
+        <li>Delivered interactive drill-down capabilities allowing users to move from global overview to detailed vehicle-level insights for better operational decision-making</li>
+        <li>Identified and helped resolve over $2M in cost discrepancies, significantly improving financial accuracy and operational transparency</li>
+      </ul>
+      <div class="project-tags"><span class="ptag orange">Power BI</span><span class="ptag blue">Power Query</span><span class="ptag gray">Excel</span><span class="ptag yellow">Data Modeling</span></div>
+    </div>
+  </div>
+
+  <!-- PROJECT 04 -->
+  <div class="project-card">
+    <div>
+      <div class="screenshot-main-frame" onclick="openLb(this,'PROJECT 04')">
+        <img src="pbi4-1.png" alt="Project 4"> -->
+        <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">MAIN SCREENSHOT<br>pbi-04-main.png</span></div>
+        <div class="zoom-overlay"><div class="zoom-icon">🔍</div></div>
+      </div>
+      <div class="thumb-strip">
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 04 · Detail A')">
+          <img src="pbi4-2.png" alt="Detail"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 1</span></div>
+        </div>
+        <div class="thumb-frame" onclick="openLb(this,'PROJECT 04 · Detail B')">
+          <img src="pbi4-3.png" alt="Detail"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 2</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="project-info">
+      <div class="project-meta"><span class="project-num">PROJECT 04</span><span class="project-type">Global Infrastructure Section</span></div>
+      <h2 class="project-title">Unifier Portal</h2>
+<!--      <p class="project-desc">✏️ Describe this project.</p>-->
+      <ul class="project-bullets">
+        <li>Led data administration and management for Oracle Primavera Unifier, handling large volumes of operational and annual verification data across multiple reports and modules</li>
+        <li>Developed a robust Python + SQL data pipeline to extract, consolidate, and validate data from daily updated reports, significantly improving data quality and consistency</li>
+        <li>Designed a centralized reference (master) dataset used to standardize and cross-check all incoming reports, enabling automated quality control and reducing data discrepancies</li>
+        <li>Built complex Power BI data model integrating 50+ data sources via Power Query and SharePoint, with automated refresh pipelines ensuring up-to-date reporting</li>
+        <li>Delivered a global facility monitoring dashboard providing visibility into annual verification status, tracking submission completeness and highlighting gaps in reporting</li>
+      </ul>
+      <div class="project-tags"><span class="ptag orange">Power BI</span><span class="ptag blue">Power Query</span><span class="ptag gray">Python/SQL</span><span class="ptag yellow">Data Modeling</span></div>
+    </div>
+  </div>
+
+<!--  &lt;!&ndash; ══════════════ PROJECT 05 ══════════════ &ndash;&gt;-->
+<!--  <div class="project-card">-->
+<!--    <div>-->
+<!--      <div class="screenshot-main-frame" onclick="openLb(this,'PROJECT 05')">-->
+<!--        &lt;!&ndash; ✏️ <img src="pbi-05-main.png" alt="Project 5"> &ndash;&gt;-->
+<!--        <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">MAIN SCREENSHOT<br>pbi-05-main.png</span></div>-->
+<!--        <div class="zoom-overlay"><div class="zoom-icon">🔍</div></div>-->
+<!--      </div>-->
+<!--      <div class="thumb-strip">-->
+<!--        <div class="thumb-frame" onclick="openLb(this,'PROJECT 05 · Detail A')">-->
+<!--          &lt;!&ndash; ✏️ <img src="pbi-05-thumb1.png" alt="Detail"> &ndash;&gt;-->
+<!--          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 1</span></div>-->
+<!--        </div>-->
+<!--        <div class="thumb-frame" onclick="openLb(this,'PROJECT 05 · Detail B')">-->
+<!--          &lt;!&ndash; ✏️ <img src="pbi-05-thumb2.png" alt="Detail"> &ndash;&gt;-->
+<!--          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 2</span></div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="project-info">-->
+<!--      <div class="project-meta"><span class="project-num">PROJECT 05</span><span class="project-type">✏️ Marketing</span></div>-->
+<!--      <h2 class="project-title">✏️ Your Dashboard Title</h2>-->
+<!--      <p class="project-desc">✏️ Describe this project.</p>-->
+<!--      <ul class="project-bullets">-->
+<!--        <li>✏️ Key feature</li><li>✏️ Technical highlight</li><li>✏️ Business impact</li>-->
+<!--      </ul>-->
+<!--      <div class="project-tags"><span class="ptag">Power BI</span><span class="ptag">DAX</span><span class="ptag gray">✏️ Tag</span></div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; ══════════════ PROJECT 06 ══════════════ &ndash;&gt;-->
+<!--  <div class="project-card">-->
+<!--    <div>-->
+<!--      <div class="screenshot-main-frame" onclick="openLb(this,'PROJECT 06')">-->
+<!--        &lt;!&ndash; ✏️ <img src="pbi-06-main.png" alt="Project 6"> &ndash;&gt;-->
+<!--        <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">MAIN SCREENSHOT<br>pbi-06-main.png</span></div>-->
+<!--        <div class="zoom-overlay"><div class="zoom-icon">🔍</div></div>-->
+<!--      </div>-->
+<!--      <div class="thumb-strip">-->
+<!--        <div class="thumb-frame" onclick="openLb(this,'PROJECT 06 · Detail A')">-->
+<!--          &lt;!&ndash; ✏️ <img src="pbi-06-thumb1.png" alt="Detail"> &ndash;&gt;-->
+<!--          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 1</span></div>-->
+<!--        </div>-->
+<!--        <div class="thumb-frame" onclick="openLb(this,'PROJECT 06 · Detail B')">-->
+<!--          &lt;!&ndash; ✏️ <img src="pbi-06-thumb2.png" alt="Detail"> &ndash;&gt;-->
+<!--          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">THUMB 2</span></div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="project-info">-->
+<!--      <div class="project-meta"><span class="project-num">PROJECT 06</span><span class="project-type">✏️ Executive KPI</span></div>-->
+<!--      <h2 class="project-title">✏️ Your Dashboard Title</h2>-->
+<!--      <p class="project-desc">✏️ Describe this project.</p>-->
+<!--      <ul class="project-bullets">-->
+<!--        <li>✏️ Key feature</li><li>✏️ Technical highlight</li><li>✏️ Business impact</li>-->
+<!--      </ul>-->
+<!--      <div class="project-tags"><span class="ptag">Power BI</span><span class="ptag">KPI</span><span class="ptag gray">✏️ Tag</span></div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+
+</div>
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*90); obs.unobserve(e.target); } });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.project-card').forEach(el => obs.observe(el));
+
+  function openLb(el, cap) {
+    const real = el.querySelector('img');
+    document.getElementById('lb-img').style.display  = real ? 'block' : 'none';
+    document.getElementById('lb-ph').style.display   = real ? 'none'  : 'block';
+    if(real) document.getElementById('lb-img').src = real.src;
+    document.getElementById('lb-cap').textContent = cap;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLb(e) {
+    if(e && e.target !== document.getElementById('lightbox')) return;
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow=''; } });
+</script>
+</body>
+</html>

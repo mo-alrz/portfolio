@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Projects — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26;
+    --sql: #e95420; --sql-light: #fb923c; --sql-dim: rgba(233,84,32,0.15);
+    --text: #f0f0f5; --muted: #888899; --border: rgba(255,255,255,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 3rem; display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px); background: rgba(10,10,15,0.8); border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: #06d6a0; letter-spacing: 0.1em; text-decoration: none; }
+  .nav-back { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
+  .nav-back:hover { color: var(--text); }
+
+  .page-hero { padding: 8rem 3rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .breadcrumb { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; }
+  .breadcrumb a { color: #06d6a0; text-decoration: none; }
+  .sql-badge {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--sql-dim); border: 1px solid rgba(251,146,60,0.3);
+    padding: 0.5rem 1.2rem; border-radius: 100px;
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--sql-light); letter-spacing: 0.08em; margin-bottom: 1.5rem;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .title-accent { color: var(--sql-light); }
+  .page-desc { color: var(--muted); margin-top: 1rem; max-width: 500px; font-size: 1rem; line-height: 1.7; }
+
+  .divider { height: 1px; background: var(--border); max-width: 1200px; margin: 2rem auto 0; }
+
+  .edit-hint { max-width: 1200px; margin: 2rem auto 0; padding: 0 3rem; }
+  .hint-box { background: rgba(251,146,60,0.05); border: 1px dashed rgba(251,146,60,0.25); border-radius: 12px; padding: 1.2rem 1.8rem; display: flex; gap: 1rem; }
+  .hint-text { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--muted); line-height: 1.8; }
+  .hint-text strong { color: var(--sql-light); }
+
+  /* PROJECTS */
+  .projects-container { max-width: 1200px; margin: 0 auto; padding: 3rem; }
+  .projects-list { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .sql-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 2rem; align-items: start;
+    padding: 2rem 2.5rem;
+    opacity: 0; transform: translateX(-20px);
+    transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s, background 0.3s;
+  }
+  .sql-card.visible { opacity: 1; transform: none; }
+  .sql-card:hover { border-color: rgba(251,146,60,0.25); background: rgba(255,255,255,0.02); }
+
+  .sql-card-num {
+    font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700;
+    color: rgba(251,146,60,0.2); line-height: 1; min-width: 50px;
+    transition: color 0.3s;
+  }
+  .sql-card:hover .sql-card-num { color: rgba(251,146,60,0.5); }
+
+  .sql-card-body { display: flex; flex-direction: column; gap: 0.8rem; }
+  .sql-card-meta { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .sql-category { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--sql-light); letter-spacing: 0.12em; }
+  .sql-db { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 4px; border: 1px solid var(--border); }
+  .sql-title { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+  .sql-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.7; max-width: 650px; }
+
+  .sql-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .stag {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    padding: 0.25rem 0.7rem; border-radius: 100px;
+    background: var(--sql-dim); color: var(--sql-light);
+    border: 1px solid rgba(251,146,60,0.2);
+  }
+  .stag.gray { background: rgba(255,255,255,0.05); color: var(--muted); border-color: var(--border); }
+
+  /* CODE SNIPPET PREVIEW */
+  .sql-snippet {
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 1rem 1.2rem;
+    font-family: 'Space Mono', monospace; font-size: 0.7rem;
+    color: var(--muted); line-height: 1.6; margin-top: 0.3rem;
+    max-width: 600px; overflow: hidden;
+  }
+  .sql-kw { color: var(--sql-light); }
+  .sql-fn { color: #a78bfa; }
+  .sql-str { color: #34d399; }
+  .sql-cm { color: rgba(255,255,255,0.25); }
+
+  .sql-card-actions { display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-end; padding-top: 0.3rem; }
+  .github-link {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--sql-dim); border: 1px solid rgba(251,146,60,0.3);
+    color: var(--sql-light); padding: 0.7rem 1.4rem;
+    border-radius: 100px; text-decoration: none;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    letter-spacing: 0.05em; white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .github-link:hover { background: rgba(251,146,60,0.2); transform: translateY(-2px); }
+  .complexity-badge {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); background: rgba(255,255,255,0.04);
+    padding: 0.3rem 0.8rem; border-radius: 100px;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  @media(max-width:900px) {
+    .sql-card { grid-template-columns: 1fr; gap: 1rem; }
+    .sql-card-num { font-size: 1.2rem; }
+    .sql-card-actions { flex-direction: row; flex-wrap: wrap; }
+    nav { padding: 1rem 1.5rem; }
+    .page-hero { padding: 7rem 1.5rem 2rem; }
+    .projects-container, .edit-hint { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index_clean.html" class="nav-logo">Mohammad's Portfolio</a>
+  <a href="index_clean.html#projects" class="nav-back">← Back to Projects</a>
+</nav>
+
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">home</a> / <a href="projects.html">projects</a> / sql</div>
+  <div class="sql-badge">🗄️ SQL & Databases</div>
+  <h1 class="page-title"><span class="title-accent">SQL</span><br>Projects</h1>
+  <p class="page-desc">Complex queries, database design, stored procedures, CTEs, window functions, and data engineering — all on GitHub.</p>
+</div>
+<div class="divider"></div>
+
+<div class="edit-hint" style="margin-top:2rem">
+  <div class="hint-box">
+    <span style="font-size:1.2rem;flex-shrink:0">💡</span>
+    <div class="hint-text">
+      <strong>In This Section:</strong> You’ll find examples of my <strong>SQL-based data analysis</strong>, including analytical queries, data transformations, and insight extraction from structured datasets.
+    </div>
+  </div>
+</div>
+
+<div class="projects-container">
+  <div class="projects-list">
+
+
+    <!-- SQL PROJECT 1 -->
+    <div class="sql-card">
+    <div class="sql-card-num">01</div>
+
+      <div class="sql-card-body">
+        <div class="sql-card-meta">
+          <span class="sql-category">DATA ANALYSIS</span>
+          <span class="sql-db">PostgreSQL</span>
+        </div>
+
+        <h2 class="sql-title">SQL Analytics Queries</h2>
+
+        <p class="sql-desc">
+          Collection of analytical SQL queries developed on structured datasets, covering joins, aggregations,
+          subqueries, CTEs, and window functions to extract insights and perform data analysis.
+        </p>
+
+        <div class="sql-snippet">
+            <span class="sql-cm">-- Rank top entities and calculate contribution to total</span>
+            <br><span class="sql-kw">WITH</span> ranked_data <span class="sql-kw">AS</span> (
+            <br>&nbsp;&nbsp;<span class="sql-kw">SELECT</span> category,
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-fn">SUM</span>(value) <span class="sql-kw">AS</span> total_value,
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-fn">ROW_NUMBER()</span> <span class="sql-kw">OVER</span> (<span class="sql-kw">PARTITION BY</span> category <span class="sql-kw">ORDER BY</span> <span class="sql-fn">SUM</span>(value) <span class="sql-kw">DESC</span>) <span class="sql-kw">AS</span> rank,
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sql-fn">SUM</span>(value) <span class="sql-kw">OVER</span> () <span class="sql-kw">AS</span> overall_total
+            <br>&nbsp;&nbsp;<span class="sql-kw">FROM</span> dataset
+            <br>&nbsp;&nbsp;<span class="sql-kw">GROUP BY</span> category
+            <br>)
+            <br><span class="sql-kw">SELECT</span> *,
+            <br>&nbsp;&nbsp;(total_value * 1.0 / overall_total) <span class="sql-kw">AS</span> contribution_ratio
+            <br><span class="sql-kw">FROM</span> ranked_data;
+        </div>
+
+        <div class="sql-tags">
+          <span class="stag">Joins</span>
+          <span class="stag">Aggregation</span>
+          <span class="stag">CTEs</span>
+          <span class="stag">Window Functions</span>
+        </div>
+      </div>
+
+      <div class="sql-card-actions">
+        <a href="https://github.com/mo-alrz/SQL" class="github-link" target="_blank">
+          ⌥ View on GitHub →
+        </a>
+        <span class="complexity-badge">Intermediate</span>
+      </div>
+    </div>
+
+<!--    &lt;!&ndash; SQL PROJECT 2 &ndash;&gt;-->
+<!--    <div class="sql-card">-->
+<!--      <div class="sql-card-num">02</div>-->
+<!--      <div class="sql-card-body">-->
+<!--        <div class="sql-card-meta">-->
+<!--          <span class="sql-category">✏️ DATABASE DESIGN</span>-->
+<!--          <span class="sql-db">SQL Server</span>-->
+<!--        </div>-->
+<!--        <h2 class="sql-title">✏️ Your SQL Project Title</h2>-->
+<!--        <p class="sql-desc">✏️ Replace with your project description.</p>-->
+<!--        <div class="sql-snippet">-->
+<!--<span class="sql-cm">&#45;&#45; ✏️ Replace with your snippet</span>-->
+<!--<br><span class="sql-kw">CREATE</span> <span class="sql-kw">PROCEDURE</span> <span class="sql-fn">usp_YourProcedure</span>-->
+<!--<br>&nbsp;&nbsp;@param1 <span class="sql-kw">INT</span>, @param2 <span class="sql-kw">VARCHAR</span>(<span class="sql-str">50</span>)-->
+<!--<br><span class="sql-kw">AS BEGIN</span>-->
+<!--<br>&nbsp;&nbsp;<span class="sql-cm">&#45;&#45; your logic here</span>-->
+<!--<br><span class="sql-kw">END</span>-->
+<!--        </div>-->
+<!--        <div class="sql-tags">-->
+<!--          <span class="stag">Stored Procedures</span>-->
+<!--          <span class="stag">Indexes</span>-->
+<!--          <span class="stag gray">✏️ Add Tag</span>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="sql-card-actions">-->
+<!--        <a href="https://github.com/YOUR_USERNAME/YOUR_REPO_2" class="github-link" target="_blank">-->
+<!--          ⌥ View on GitHub →-->
+<!--        </a>-->
+<!--        <span class="complexity-badge">✏️ Intermediate</span>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; SQL PROJECT 3 &ndash;&gt;-->
+<!--    <div class="sql-card">-->
+<!--      <div class="sql-card-num">03</div>-->
+<!--      <div class="sql-card-body">-->
+<!--        <div class="sql-card-meta">-->
+<!--          <span class="sql-category">✏️ ETL / PIPELINE</span>-->
+<!--          <span class="sql-db">MySQL</span>-->
+<!--        </div>-->
+<!--        <h2 class="sql-title">✏️ Your SQL Project Title</h2>-->
+<!--        <p class="sql-desc">✏️ Replace with your project description.</p>-->
+<!--        <div class="sql-snippet">-->
+<!--<span class="sql-cm">&#45;&#45; ✏️ Replace with your snippet</span>-->
+<!--<br><span class="sql-kw">INSERT INTO</span> target_table-->
+<!--<br><span class="sql-kw">SELECT</span> t1.id, t2.name, <span class="sql-fn">COALESCE</span>(t3.val, <span class="sql-str">0</span>)-->
+<!--<br><span class="sql-kw">FROM</span> source1 t1-->
+<!--<br><span class="sql-kw">LEFT JOIN</span> source2 t2 <span class="sql-kw">ON</span> t1.id = t2.ref_id-->
+<!--<br><span class="sql-kw">LEFT JOIN</span> source3 t3 <span class="sql-kw">ON</span> t1.id = t3.ref_id-->
+<!--        </div>-->
+<!--        <div class="sql-tags">-->
+<!--          <span class="stag">ETL</span>-->
+<!--          <span class="stag">JOINs</span>-->
+<!--          <span class="stag gray">✏️ Add Tag</span>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="sql-card-actions">-->
+<!--        <a href="https://github.com/YOUR_USERNAME/YOUR_REPO_3" class="github-link" target="_blank">-->
+<!--          ⌥ View on GitHub →-->
+<!--        </a>-->
+<!--        <span class="complexity-badge">✏️ Advanced</span>-->
+<!--      </div>-->
+<!--    </div>-->
+
+    <!-- ✏️ COPY A CARD BLOCK ABOVE TO ADD MORE PROJECTS -->
+
+  </div>
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if(e.isIntersecting){
+        setTimeout(() => e.target.classList.add('visible'), i * 100);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.sql-card').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Projects — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26;
+    --py: #3776ab; --py-light: #60a5fa; --py-dim: rgba(55,118,171,0.15);
+    --py-yellow: #ffd43b;
+    --text: #f0f0f5; --muted: #888899; --border: rgba(255,255,255,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 3rem; display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px); background: rgba(10,10,15,0.8); border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: #06d6a0; letter-spacing: 0.1em; text-decoration: none; }
+  .nav-back { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
+  .nav-back:hover { color: var(--text); }
+
+  .page-hero { padding: 8rem 3rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .breadcrumb { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; }
+  .breadcrumb a { color: #06d6a0; text-decoration: none; }
+  .py-badge {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--py-dim); border: 1px solid rgba(96,165,250,0.3);
+    padding: 0.5rem 1.2rem; border-radius: 100px;
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--py-light); letter-spacing: 0.08em; margin-bottom: 1.5rem;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .title-accent { color: var(--py-yellow); }
+  .page-desc { color: var(--muted); margin-top: 1rem; max-width: 500px; font-size: 1rem; line-height: 1.7; }
+
+  .divider { height: 1px; background: var(--border); max-width: 1200px; margin: 2rem auto 0; }
+
+  .edit-hint { max-width: 1200px; margin: 2rem auto 0; padding: 0 3rem; }
+  .hint-box { background: rgba(96,165,250,0.05); border: 1px dashed rgba(96,165,250,0.25); border-radius: 12px; padding: 1.2rem 1.8rem; display: flex; gap: 1rem; }
+  .hint-text { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--muted); line-height: 1.8; }
+  .hint-text strong { color: var(--py-light); }
+
+  /* PROJECTS GRID */
+  .projects-container { max-width: 1200px; margin: 0 auto; padding: 3rem; }
+<!--  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.8rem; }-->
+  .projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.8rem;
+  }
+
+  .py-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    padding: 2rem; display: flex; flex-direction: column; gap: 1.2rem;
+    text-decoration: none; color: var(--text);
+    opacity: 0; transform: translateY(25px);
+    transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s, box-shadow 0.3s;
+    position: relative; overflow: hidden;
+  }
+
+  .py-card.visible { opacity: 1; transform: none; }
+  .py-card:hover { border-color: rgba(96,165,250,0.3); box-shadow: 0 15px 50px rgba(55,118,171,0.15); transform: translateY(-6px); }
+  .py-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--py), var(--py-yellow));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .py-card:hover::before { opacity: 1; }
+
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .card-icon { font-size: 2rem; width: 52px; height: 52px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .github-btn {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+    color: var(--muted); padding: 0.5rem 1rem; border-radius: 100px;
+    text-decoration: none; font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.05em;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .py-card:hover .github-btn { background: rgba(96,165,250,0.1); color: var(--py-light); border-color: rgba(96,165,250,0.3); }
+
+  .card-category { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--py-light); letter-spacing: 0.12em; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+  .card-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.7; flex: 1; }
+
+  .card-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .stack-tag {
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    padding: 0.25rem 0.7rem; border-radius: 100px;
+    background: var(--py-dim); color: var(--py-light);
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .stack-tag.yellow { background: rgba(255,212,59,0.1); color: var(--py-yellow); border-color: rgba(255,212,59,0.2); }
+  .stack-tag.gray { background: rgba(255,255,255,0.05); color: var(--muted); border-color: var(--border); }
+
+  .card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 1rem; border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted);
+  }
+  .card-stars { display: flex; align-items: center; gap: 0.3rem; }
+
+  @media(max-width:768px) {
+    nav { padding: 1rem 1.5rem; }
+    .page-hero { padding: 7rem 1.5rem 2rem; }
+    .projects-container, .edit-hint { padding: 1.5rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index_clean.html" class="nav-logo">Mohammad's portfolio</a>
+  <a href="index_clean.html#projects" class="nav-back">← Back to Projects</a>
+</nav>
+
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">home</a> / <a href="projects.html">projects</a> / python</div>
+  <div class="py-badge">🐍 Python</div>
+  <h1 class="page-title"><span class="title-accent">Python</span><br>Projects</h1>
+  <p class="page-desc">Machine learning, deep learning, data science, and automation projects — all open source on GitHub.</p>
+</div>
+<div class="divider"></div>
+
+<div class="edit-hint" style="margin-top:2rem">
+  <div class="hint-box">
+    <span style="font-size:1.2rem;flex-shrink:0">💡</span>
+    <div class="hint-text">
+      <strong>In This Section:</strong> You’ll find a selection of my <strong>Data Science and Machine Learning</strong> projects, showcasing predictive modeling, deep learning, and analytical solutions built with Python.
+    </div>
+  </div>
+</div>
+
+<div class="projects-container">
+  <div class="projects-grid">
+
+    <!-- PYTHON PROJECT 1 -->
+    <div class="py-card">
+      <div class="card-top">
+        <div class="card-icon">🤖</div>
+        <a href="https://github.com/mo-alrz/Predictive-Modeling-of-Ad-Clicks-Based-on-User-Cursor-Behavior/blob/main/Coding%20Project.pdf" class="github-btn" target="_blank">
+          ⌥ GitHub →
+        </a>
+      </div>
+      <span class="card-category">Machine Learning & Deep Learning</span>
+      <h2 class="card-title">Ad Click Prediction (Cursor Data)</h2>
+      <p class="card-desc"> End-to-end predictive system using user cursor behavior to model ad click probability.
+    Combined classical machine learning, deep learning, and ensemble methods
+    (bagging, boosting, stacking) for improved performance and robustness.</p>
+      <div class="card-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag yellow">Scikit-learn</span>
+        <span class="stack-tag gray">TensorFlow/Keras</span>
+        <span class="stack-tag ">Feature Engineering</span>
+        <span class="stack-tag gray">Ensemble learning</span>
+      </div>
+      <div class="card-footer">
+        <span>Hybrid ML/DL System</span>
+        <span class="card-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+    </div>
+
+    <!-- PYTHON PROJECT 2 -->
+    <div class="py-card">
+      <div class="card-top">
+        <div class="card-icon">🧬</div>
+        <a href="https://github.com/mo-alrz/Neural-Network-Project/blob/main/Deep%20Learning%20HA.pdf" class="github-btn" target="_blank">
+          ⌥ GitHub →
+        </a>
+      </div>
+
+      <span class="card-category">Deep Learning</span>
+
+      <h2 class="card-title">Cursor Image-Based Click Prediction</h2>
+
+      <p class="card-desc">
+        Built a convolutional neural network (CNN) to classify user click behavior
+        from cursor movement images. Applied preprocessing, augmentation, and
+        regularization techniques to improve generalization.
+      </p>
+
+      <div class="card-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">TensorFlow</span>
+        <span class="stack-tag yellow">CNN</span>
+        <span class="stack-tag">Computer Vision</span>
+        <span class="stack-tag gray">Augmentation</span>
+      </div>
+
+      <div class="card-footer">
+        <span>~76% Validation Accuracy</span>
+        <span class="card-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+    </div>
+
+    <!-- PYTHON PROJECT 3 -->
+    <div class="py-card">
+      <div class="card-top">
+        <div class="card-icon">📊</div>
+        <a href="https://github.com/mo-alrz/Classification-Project/blob/main/Home-Assignment.pdf" class="github-btn" target="_blank">
+          ⌥ GitHub →
+        </a>
+      </div>
+
+      <span class="card-category">Machine Learning</span>
+
+      <h2 class="card-title">COVID-19 Outcome Classification</h2>
+
+      <p class="card-desc">
+        Built and evaluated multiple classical machine learning models to classify
+        COVID-19 related conditions based on demographic and mortality data.
+        Included full data preprocessing, feature engineering, and model comparison.
+      </p>
+
+      <div class="card-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">Scikit-learn</span>
+        <span class="stack-tag yellow">Classification</span>
+        <span class="stack-tag">Data Preprocessing</span>
+        <span class="stack-tag gray">Model Evaluation</span>
+      </div>
+
+      <div class="card-footer">
+        <span>~90% Accuracy (SVM)</span>
+        <span class="card-stars">⭐⭐⭐⭐⭐</span>
+      </div>
+    </div>
+
+    <!-- PYTHON PROJECT 4 -->
+    <div class="py-card">
+      <div class="card-top">
+        <div class="card-icon">📈</div>
+        <a href="https://github.com/mo-alrz/Data-preparation/blob/main/Data%20preparation%20project.pdf" class="github-btn" target="_blank">
+          ⌥ GitHub →
+        </a>
+      </div>
+
+      <span class="card-category">Exploratory Data Analysis</span>
+
+      <h2 class="card-title">Customer Segmentation EDA</h2>
+
+      <p class="card-desc">
+        Performed comprehensive data cleaning, preprocessing, and exploratory analysis
+        on customer data. Identified patterns across demographics, spending behavior,
+        and segmentation using statistical analysis and visualizations.
+      </p>
+
+      <div class="card-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">Pandas</span>
+        <span class="stack-tag">Seaborn</span>
+        <span class="stack-tag yellow">EDA</span>
+        <span class="stack-tag gray">Data Cleaning</span>
+      </div>
+
+      <div class="card-footer">
+        <span>End-to-end data preparation & analysis</span>
+        <span class="card-stars">⭐ — stars</span>
+      </div>
+    </div>
+
+    <!-- PYTHON PROJECT 5 -->
+    <div class="py-card">
+      <div class="card-top">
+        <div class="card-icon">🎰</div>
+        <a href="https://github.com/mo-alrz/API/tree/main/Euro%20jackpot" class="github-btn" target="_blank">
+          ⌥ GitHub →
+        </a>
+      </div>
+
+      <span class="card-category">Web App</span>
+      <h2 class="card-title">EuroJackpot Historical Value Analyzer</h2>
+      <p class="card-desc">
+        Built a Flask-based web application that scrapes EuroJackpot historical results,
+        calculates the cumulative value of selected number combinations, and stores results
+        in a SQLite database.
+      </p>
+
+      <div class="card-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">Flask</span>
+        <span class="stack-tag">SQLite</span>
+        <span class="stack-tag yellow">Web Scraping</span>
+        <span class="stack-tag gray">HTML/CSS</span>
+      </div>
+
+      <div class="card-footer">
+        <span>Scraping + database workflow</span>
+        <span class="card-stars">⭐ — stars</span>
+      </div>
+    </div>
+
+    <!-- PYTHON PROJECT 6 -->
+    <div class="py-card">
+      <div class="card-top">
+        <div class="card-icon">⏳</div>
+        <a href="https://github.com/YOUR_USERNAME/TIME-SERIES" class="github-btn" target="_blank">
+          ⌥ GitHub →
+        </a>
+      </div>
+
+      <span class="card-category">Time Series</span>
+
+      <h2 class="card-title">Time Series Forecasting Model</h2>
+
+      <p class="card-desc">
+        Developed forecasting models to analyze temporal patterns and predict future values
+        based on historical data. Explored trends, seasonality, and model performance.
+      </p>
+
+      <div class="card-stack">
+        <span class="stack-tag">Python</span>
+        <span class="stack-tag">Pandas</span>
+        <span class="stack-tag">Time Series</span>
+        <span class="stack-tag yellow">Forecasting</span>
+        <span class="stack-tag gray">Model Evaluation</span>
+      </div>
+
+      <div class="card-footer">
+        <span>Trend & Seasonality Analysis</span>
+        <span class="card-stars">⭐ — stars</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if(e.isIntersecting){
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.py-card').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

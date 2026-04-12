@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel Projects — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26;
+    --xl: #1d6f42; --xl-light: #34d399; --xl-dim: rgba(29,111,66,0.15);
+    --text: #f0f0f5; --muted: #888899; --border: rgba(255,255,255,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.5;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 1.2rem 3rem; display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(20px); background: rgba(10,10,15,0.85); border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: #06d6a0; letter-spacing: 0.1em; text-decoration: none; }
+  .nav-back { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
+  .nav-back:hover { color: var(--text); }
+
+  .page-hero { padding: 8rem 3rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .breadcrumb { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; }
+  .breadcrumb a { color: #06d6a0; text-decoration: none; }
+  .xl-badge {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--xl-dim); border: 1px solid rgba(52,211,153,0.3);
+    padding: 0.5rem 1.2rem; border-radius: 100px;
+    font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--xl-light); letter-spacing: 0.08em; margin-bottom: 1.5rem;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .title-accent { color: var(--xl-light); }
+  .page-desc { color: var(--muted); margin-top: 1rem; max-width: 500px; font-size: 1rem; line-height: 1.7; }
+
+  .divider { height: 1px; background: var(--border); max-width: 1200px; margin: 0 auto; }
+
+  .edit-hint { max-width: 1200px; margin: 2rem auto 0; padding: 0 3rem; }
+  .hint-box { background: rgba(52,211,153,0.04); border: 1px dashed rgba(52,211,153,0.2); border-radius: 12px; padding: 1rem 1.5rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .hint-text { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); line-height: 1.8; }
+  .hint-text strong { color: var(--xl-light); }
+
+  /* ── PROJECT CARDS ── */
+  .projects-container { max-width: 1200px; margin: 0 auto; padding: 3rem; display: flex; flex-direction: column; gap: 3rem; }
+
+  .xl-project {
+    background: var(--card); border: 1px solid var(--border); border-radius: 22px; overflow: hidden;
+    opacity: 0; transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease, border-color 0.3s;
+  }
+  .xl-project.visible { opacity: 1; transform: none; }
+  .xl-project:hover { border-color: rgba(52,211,153,0.18); }
+
+  /* TOP BAR */
+  .xl-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    padding: 1.6rem 2.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .xl-topbar-left { display: flex; align-items: center; gap: 1.2rem; }
+  .xl-icon { width: 52px; height: 52px; border-radius: 12px; background: var(--xl-dim); border: 1px solid rgba(52,211,153,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0; }
+  .xl-meta { display: flex; flex-direction: column; gap: 0.3rem; }
+  .xl-num { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--xl-light); letter-spacing: 0.15em; }
+  .xl-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+  .xl-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .xtag { font-family: 'Space Mono', monospace; font-size: 0.62rem; padding: 0.22rem 0.65rem; border-radius: 100px; background: var(--xl-dim); color: var(--xl-light); border: 1px solid rgba(52,211,153,0.2); }
+  .xtag.gray { background: rgba(255,255,255,0.05); color: var(--muted); border-color: var(--border); }
+
+  /* Download button */
+  .xl-dl {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--xl-dim); border: 1px solid rgba(52,211,153,0.3);
+    color: var(--xl-light); padding: 0.7rem 1.5rem; border-radius: 100px;
+    text-decoration: none; font-family: 'Space Mono', monospace; font-size: 0.73rem;
+    letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
+    transition: background 0.25s, transform 0.25s;
+  }
+  .xl-dl:hover { background: rgba(52,211,153,0.22); transform: translateY(-2px); }
+  .xl-dl-icon { font-size: 0.9rem; }
+
+  /* BODY: preview + description side by side */
+  .xl-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; }
+
+  /* Preview panel */
+  .xl-preview-panel { border-right: 1px solid var(--border); padding: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+  .xl-preview-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.12em; display: flex; align-items: center; gap: 0.5rem; }
+  .xl-preview-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .xl-screenshot {
+    width: 100%; aspect-ratio: 16/10; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--surface); cursor: pointer; position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .xl-screenshot:hover { border-color: rgba(52,211,153,0.4); transform: scale(1.015); }
+  .xl-screenshot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .xl-screenshot .ph { background: linear-gradient(135deg, #13131c, #0d0d16); }
+  .xl-screenshot .ph-icon { font-size: 2rem; }
+  .xl-screenshot .ph-label { font-size: 0.62rem; }
+
+  .xl-zoom-hint { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: rgba(255,255,255,0.15); text-align: center; letter-spacing: 0.06em; }
+
+  /* Thumbnail row */
+  .xl-thumb-row { display: flex; gap: 0.5rem; }
+  .xl-thumb { flex: 1; aspect-ratio: 16/10; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: border-color 0.3s, transform 0.3s; }
+  .xl-thumb:hover { border-color: rgba(52,211,153,0.4); transform: translateY(-2px); }
+  .xl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .xl-thumb .ph { gap: 0.2rem; }
+  .xl-thumb .ph-icon { font-size: 0.9rem; }
+  .xl-thumb .ph-label { font-size: 0.5rem; }
+
+  /* File info strip */
+  .xl-file-info { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border); }
+  .xl-ext { background: var(--xl); color: white; padding: 0.18rem 0.5rem; border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
+  .xl-filename { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+
+  /* Description panel */
+  .xl-desc-panel { padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1.2rem; }
+  .xl-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
+  .xl-desc strong { color: var(--text); }
+  .xl-highlights { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .xl-highlights li { display: flex; gap: 0.7rem; font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+  .xl-highlights li::before { content: '▸'; color: var(--xl-light); flex-shrink: 0; margin-top: 1px; }
+
+  /* Lightbox */
+  .lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.94); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(12px); }
+  .lightbox.open { opacity: 1; pointer-events: all; }
+  .lb-inner { position: relative; }
+  .lb-inner img { max-width: 90vw; max-height: 85vh; border-radius: 12px; box-shadow: 0 0 100px rgba(0,0,0,0.8); display: block; }
+  .lb-ph { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: center; padding: 3rem 4rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; line-height: 2.2; }
+  .lb-close { position: fixed; top: 1.5rem; right: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .lb-close:hover { background: rgba(255,255,255,0.2); }
+
+  /* Placeholders */
+  .ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; }
+  .ph-icon { font-size: 2rem; }
+  .ph-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.18); letter-spacing: 0.08em; text-align: center; line-height: 1.6; }
+
+  @media(max-width:900px) {
+    .xl-body { grid-template-columns: 1fr; }
+    .xl-preview-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    nav { padding: 1rem 1.5rem; }
+    .page-hero { padding: 7rem 1.5rem 2rem; }
+    .projects-container, .edit-hint { padding: 1.5rem; }
+    .xl-topbar { padding: 1.2rem 1.5rem; }
+    .xl-desc-panel { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lightbox" id="lightbox" onclick="closeLb(event)">
+  <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('open');document.body.style.overflow=''">✕</button>
+  <div class="lb-inner">
+    <img id="lb-img" src="" alt="" style="display:none">
+    <div id="lb-ph" class="lb-ph" style="display:none">📸 No screenshot added yet.<br><span style="font-size:0.65rem;opacity:0.5">Uncomment the &lt;img&gt; tag and add your file.</span></div>
+  </div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">// portfolio.py</a>
+  <a href="projects.html" class="nav-back">← Back to Projects</a>
+</nav>
+
+<div class="page-hero">
+  <div class="breadcrumb"><a href="index.html">home</a> / <a href="projects.html">projects</a> / excel</div>
+  <div class="xl-badge">📗 Microsoft Excel</div>
+  <h1 class="page-title">Excel<br><span class="title-accent">Projects</span></h1>
+  <p class="page-desc">Advanced Excel models, financial analysis, automation with VBA & Power Query, and dynamic dashboards.</p>
+</div>
+<div class="divider"></div>
+
+<div class="edit-hint"><div style="height:1.5rem"></div>
+  <div class="hint-box">
+    <span style="font-size:1.1rem;flex-shrink:0;margin-top:2px">💡</span>
+    <div class="hint-text">
+      <strong>HOW TO CUSTOMIZE:</strong>
+      • <strong>Screenshots:</strong> Uncomment <strong>&lt;img src="xl-0X-preview.png"&gt;</strong> and put your image in the same folder.<br>
+      • <strong>File download:</strong> Replace <strong>href="YOUR_FILE.xlsx"</strong> with your file path or a Google Drive / OneDrive direct link.<br>
+      • <strong>File name:</strong> Update the filename shown in the file-info strip.
+    </div>
+  </div>
+</div>
+
+<div class="projects-container">
+
+  <!-- ════════════════════ PROJECT 01 ════════════════════ -->
+  <div class="xl-project">
+    <div class="xl-topbar">
+      <div class="xl-topbar-left">
+        <div class="xl-icon">📊</div>
+        <div class="xl-meta">
+          <span class="xl-num">PROJECT 01</span>
+          <h2 class="xl-title">✏️ Your Excel Project Title</h2>
+          <div class="xl-tags">
+            <span class="xtag">Power Query</span>
+            <span class="xtag">Pivot Tables</span>
+            <span class="xtag gray">✏️ Add Tag</span>
+          </div>
+        </div>
+      </div>
+      <!-- ✏️ Replace href with your file path or Google Drive link -->
+      <a href="YOUR_FILE_1.xlsx" class="xl-dl" download>
+        <span class="xl-dl-icon">⬇</span> Download File
+      </a>
+    </div>
+
+    <div class="xl-body">
+      <!-- LEFT: Preview -->
+      <div class="xl-preview-panel">
+        <div class="xl-preview-label">PREVIEW</div>
+
+        <!-- Main screenshot — click to lightbox -->
+        <div class="xl-screenshot" onclick="openLb(this)">
+          <!-- ✏️ <img src="xl-01-preview.png" alt="Excel Project 1 preview"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">SCREENSHOT<br>xl-01-preview.png</span></div>
+        </div>
+        <div class="xl-zoom-hint">click to enlarge</div>
+
+        <!-- Thumbnail row (optional 2 extra views) -->
+        <div class="xl-thumb-row">
+          <div class="xl-thumb" onclick="openLb(this)">
+            <!-- ✏️ <img src="xl-01-thumb1.png" alt="Sheet 2"> -->
+            <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">SHEET 2</span></div>
+          </div>
+          <div class="xl-thumb" onclick="openLb(this)">
+            <!-- ✏️ <img src="xl-01-thumb2.png" alt="Sheet 3"> -->
+            <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">SHEET 3</span></div>
+          </div>
+        </div>
+
+        <!-- File info -->
+        <div class="xl-file-info">
+          <span class="xl-ext">XLSX</span>
+          <span class="xl-filename">✏️ your-file-1.xlsx</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Description -->
+      <div class="xl-desc-panel">
+        <p class="xl-desc">✏️ <strong>Replace this</strong> with your project description. What was the goal? What data did you work with?</p>
+        <p class="xl-desc">✏️ Add more context about the methodology, techniques, or business value of this project.</p>
+        <ul class="xl-highlights">
+          <li>✏️ Key feature or capability</li>
+          <li>✏️ Technical highlight (e.g. "Dynamic array formulas with XLOOKUP")</li>
+          <li>✏️ Business impact or result</li>
+          <li>✏️ Any additional notable aspect</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ PROJECT 02 ════════════════════ -->
+  <div class="xl-project">
+    <div class="xl-topbar">
+      <div class="xl-topbar-left">
+        <div class="xl-icon">💹</div>
+        <div class="xl-meta">
+          <span class="xl-num">PROJECT 02</span>
+          <h2 class="xl-title">✏️ Your Excel Project Title</h2>
+          <div class="xl-tags">
+            <span class="xtag">VBA</span>
+            <span class="xtag">Dashboard</span>
+            <span class="xtag gray">✏️ Add Tag</span>
+          </div>
+        </div>
+      </div>
+      <a href="YOUR_FILE_2.xlsx" class="xl-dl" download>
+        <span class="xl-dl-icon">⬇</span> Download File
+      </a>
+    </div>
+    <div class="xl-body">
+      <div class="xl-preview-panel">
+        <div class="xl-preview-label">PREVIEW</div>
+        <div class="xl-screenshot" onclick="openLb(this)">
+          <!-- ✏️ <img src="xl-02-preview.png" alt="Excel Project 2"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">SCREENSHOT<br>xl-02-preview.png</span></div>
+        </div>
+        <div class="xl-zoom-hint">click to enlarge</div>
+        <div class="xl-thumb-row">
+          <div class="xl-thumb" onclick="openLb(this)">
+            <!-- ✏️ <img src="xl-02-thumb1.png" alt="View 2"> -->
+            <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">VIEW 2</span></div>
+          </div>
+          <div class="xl-thumb" onclick="openLb(this)">
+            <!-- ✏️ <img src="xl-02-thumb2.png" alt="View 3"> -->
+            <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">VIEW 3</span></div>
+          </div>
+        </div>
+        <div class="xl-file-info">
+          <span class="xl-ext">XLSX</span>
+          <span class="xl-filename">✏️ your-file-2.xlsx</span>
+        </div>
+      </div>
+      <div class="xl-desc-panel">
+        <p class="xl-desc">✏️ <strong>Replace this</strong> with your project description.</p>
+        <p class="xl-desc">✏️ Add more detail about your approach.</p>
+        <ul class="xl-highlights">
+          <li>✏️ Key feature</li>
+          <li>✏️ Technical highlight</li>
+          <li>✏️ Business impact</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ PROJECT 03 ════════════════════ -->
+  <div class="xl-project">
+    <div class="xl-topbar">
+      <div class="xl-topbar-left">
+        <div class="xl-icon">📋</div>
+        <div class="xl-meta">
+          <span class="xl-num">PROJECT 03</span>
+          <h2 class="xl-title">✏️ Your Excel Project Title</h2>
+          <div class="xl-tags">
+            <span class="xtag">Financial Model</span>
+            <span class="xtag">Forecasting</span>
+            <span class="xtag gray">✏️ Add Tag</span>
+          </div>
+        </div>
+      </div>
+      <a href="YOUR_FILE_3.xlsx" class="xl-dl" download>
+        <span class="xl-dl-icon">⬇</span> Download File
+      </a>
+    </div>
+    <div class="xl-body">
+      <div class="xl-preview-panel">
+        <div class="xl-preview-label">PREVIEW</div>
+        <div class="xl-screenshot" onclick="openLb(this)">
+          <!-- ✏️ <img src="xl-03-preview.png" alt="Excel Project 3"> -->
+          <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">SCREENSHOT<br>xl-03-preview.png</span></div>
+        </div>
+        <div class="xl-zoom-hint">click to enlarge</div>
+        <div class="xl-thumb-row">
+          <div class="xl-thumb" onclick="openLb(this)">
+            <!-- ✏️ <img src="xl-03-thumb1.png" alt="View 2"> -->
+            <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">VIEW 2</span></div>
+          </div>
+          <div class="xl-thumb" onclick="openLb(this)">
+            <!-- ✏️ <img src="xl-03-thumb2.png" alt="View 3"> -->
+            <div class="ph"><span class="ph-icon">📸</span><span class="ph-label">VIEW 3</span></div>
+          </div>
+        </div>
+        <div class="xl-file-info">
+          <span class="xl-ext">XLSX</span>
+          <span class="xl-filename">✏️ your-file-3.xlsx</span>
+        </div>
+      </div>
+      <div class="xl-desc-panel">
+        <p class="xl-desc">✏️ <strong>Replace this</strong> with your project description.</p>
+        <p class="xl-desc">✏️ Add more detail about your approach.</p>
+        <ul class="xl-highlights">
+          <li>✏️ Key feature</li>
+          <li>✏️ Technical highlight</li>
+          <li>✏️ Business impact</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✏️ COPY AN xl-project BLOCK ABOVE TO ADD MORE PROJECTS -->
+
+</div>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*100); obs.unobserve(e.target); } });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.xl-project').forEach(el => obs.observe(el));
+
+  function openLb(el) {
+    const real = el.querySelector('img');
+    document.getElementById('lb-img').style.display = real ? 'block' : 'none';
+    document.getElementById('lb-ph').style.display  = real ? 'none'  : 'block';
+    if(real) document.getElementById('lb-img').src = real.src;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLb(e) {
+    if(e && e.target !== document.getElementById('lightbox')) return;
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow=''; } });
+</script>
+</body>
+</html>
